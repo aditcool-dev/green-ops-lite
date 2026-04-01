@@ -1,0 +1,32 @@
+name: green-ops-lite
+description: Energy-efficient data center optimization environment
+version: 1.0
+
+observation_space:
+  type: object
+  properties:
+    rack_temp:
+      type: array
+      items:
+        type: number
+    cpu_load:
+      type: array
+      items:
+        type: number
+    power_cost:
+      type: number
+    failed_fan:
+      type: boolean
+    step_count:
+      type: integer
+
+action_space:
+  type: string
+  description: |
+    One of the following actions:
+    - increase_cooling(i)
+    - decrease_load(i)
+    - migrate_jobs(i,j)
+
+reward:
+  type: number
