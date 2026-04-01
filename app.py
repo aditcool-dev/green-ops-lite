@@ -7,7 +7,10 @@ env = GreenOpsEnv()
 
 @app.get("/")
 def home():
-    return {"status": "running"}
+    return {
+        "status": "running",
+        "endpoints": ["/reset", "/step?action=..."]
+    }
 
 @app.get("/reset")
 def reset():
