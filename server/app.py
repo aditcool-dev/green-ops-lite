@@ -15,18 +15,24 @@ def home():
         "endpoints": ["/reset", "/step?action=..."]
     }
 
-@app.post("/reset")
+@app.api_route("/reset", methods=["GET", "POST"])
 async def reset(request: Request):
-    data = await request.json() if request.method == "POST" else {}
-    task = data.get("task", "easy")
+    if request.method == "POST":
+        data = await request.json()
+        task = data.get("task", "easy")
+    else:
+        task = "easy"
 
     obs = env.reset(task)
     return {"observation": obs.dict()}
 
-@app.post("/step")
+@app.api_route("/step", methods=["GET", "POST"])
 async def step(request: Request):
-    data = await request.json()
-    action = data.get("action")
+    if request.method == "POST":
+        data = await request.json()
+        action = data.get("action")
+    else:
+        action = request.query_params.get("action")
 
     result = env.step(action)
 
