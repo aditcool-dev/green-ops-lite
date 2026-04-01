@@ -7,7 +7,6 @@ TEMP_THRESHOLD = 70
 
 class GreenOpsEnv:
     def __init__(self):
-        random.seed(42)
         self.reset()
 
     def reset(self, task_name="None"):
