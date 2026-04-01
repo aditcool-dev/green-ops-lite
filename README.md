@@ -1,5 +1,5 @@
 ---
-title: Green Ops Lite
+title: A multi-objective reinforcement learning environment for optimizing data center energy efficiency and reliability.
 emoji: 🌱
 colorFrom: green
 colorTo: blue
