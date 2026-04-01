@@ -17,22 +17,37 @@ def home():
 
 @app.api_route("/reset", methods=["GET", "POST"])
 async def reset(request: Request):
+    task = "easy"
+
     if request.method == "POST":
-        data = await request.json()
-        task = data.get("task", "easy")
-    else:
-        task = "easy"
+        try:
+            data = await request.json()
+            if isinstance(data, dict):
+                task = data.get("task", "easy")
+        except:
+            # 🔥 VERY IMPORTANT: avoid crash
+            task = "easy"
 
     obs = env.reset(task)
     return {"observation": obs.dict()}
 
 @app.api_route("/step", methods=["GET", "POST"])
 async def step(request: Request):
+    action = None
+
     if request.method == "POST":
-        data = await request.json()
-        action = data.get("action")
+        try:
+            data = await request.json()
+            if isinstance(data, dict):
+                action = data.get("action")
+        except:
+            action = None
     else:
         action = request.query_params.get("action")
+
+    # 🔥 fallback (VERY IMPORTANT)
+    if not action:
+        action = "increase_cooling(1)"
 
     result = env.step(action)
 
