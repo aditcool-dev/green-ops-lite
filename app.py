@@ -13,8 +13,8 @@ def home():
     }
 
 @app.get("/reset")
-def reset():
-    obs = env.reset()
+def reset(task: str = "easy"):
+    obs = env.reset(task)
     return {"observation": obs.dict()}
 
 @app.get("/step")
