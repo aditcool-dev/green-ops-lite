@@ -9,17 +9,17 @@ app = FastAPI()
 
 env = GreenOpsEnv()
 
-@app.get("/grade")
-async def get_grade():
-    score = grade(env)
-    return {"score": score}
-
 @app.get("/")
 def home():
     return {
         "status": "running",
         "endpoints": ["/reset", "/step?action=..."]
     }
+
+@app.get("/grade")
+async def get_grade():
+    score = grade(env)
+    return {"score": score}
 
 @app.api_route("/reset", methods=["GET", "POST"])
 async def reset(request: Request):
