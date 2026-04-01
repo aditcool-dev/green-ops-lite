@@ -158,9 +158,9 @@ We provide a hybrid baseline agent using:
 ## 📈 Baseline Results
 
 ```text
-Easy:   4.33
-Medium: 4.11
-Hard:   1.04
+Easy   → 4.33
+Medium → 4.11
+Hard   → 1.04
 ```
 
 These results demonstrate:
@@ -256,10 +256,28 @@ Green-Ops Lite bridges the gap between:
 
 It provides a **practical, research-aligned benchmark** for evaluating intelligent agents in complex operational systems.
 
+Designed to simulate real-world infrastructure decisions under uncertainty, Green-Ops Lite provides a benchmark for evaluating intelligent agents in sustainability-critical systems.
+
 ---
 
 ## 📬 Contact / Team
 
-(Add your team details here)
+Adit Rastogi
+📧 Email: aditrastogi11@gmail.com
+
+---
+
+📄 License
+
+This project is developed for the Meta × Hugging Face OpenEnv Hackathon.
+
+---
+
+🙌 Acknowledgements
+
+Special thanks to:
+
+Meta AI Hackathon organizers
+Hugging Face Spaces & OpenEnv framework
 
 ---
