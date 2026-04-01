@@ -102,27 +102,48 @@ Action:
 
     return "increase_cooling(1)"
     
+def log_start(task, model):
+    print(f"[START] task={task} env=greenops model={model}")
+
+def log_step(step, action, reward, done):
+    print(f"[STEP] step={step} action={action} reward={reward:.2f} done={str(done).lower()} error=null")
+
+def log_end(success, steps, rewards):
+    rewards_str = ",".join(f"{r:.2f}" for r in rewards)
+    score = sum(rewards)
+    print(f"[END] success={str(success).lower()} steps={steps} score={score:.2f} rewards={rewards_str}")
 
 
 def run_task(task):
-    global last_actions
-    last_actions = []
     env = GreenOpsEnv()
     obs = env.reset(task)
 
-    total = 0
+    rewards = []
+    steps = 0
 
-    for _ in range(MAX_STEPS):
+    log_start(task, MODEL_NAME)
+
+    for step in range(1, MAX_STEPS + 1):
         action = get_action(obs)
         result = env.step(action)
-        total += result.reward
+
+        reward = result.reward or 0.0
+        rewards.append(reward)
+        steps = step
+
+        log_step(step, action, reward, result.done)
+
         obs = result.observation
+
         if result.done:
             break
 
     env.close()
-    return total
 
+    success = sum(rewards) > 1.0  # simple success condition
+    log_end(success, steps, rewards)
+
+    return sum(rewards)
 
 def main():
     scores = {
@@ -130,10 +151,6 @@ def main():
         "medium": run_task("medium"),
         "hard": run_task("hard"),
     }
-
-    print(f"Easy: {scores['easy']:.2f}")
-    print(f"Medium: {scores['medium']:.2f}")
-    print(f"Hard: {scores['hard']:.2f}")
     
 if __name__ == "__main__":
     main()
