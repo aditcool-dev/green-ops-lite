@@ -3,10 +3,16 @@ from fastapi import Request
 from env.environment import GreenOpsEnv
 import uvicorn
 import os
+from env.grader import grade
 
 app = FastAPI()
 
 env = GreenOpsEnv()
+
+@app.get("/grade")
+async def get_grade():
+    score = grade(env)
+    return {"score": score}
 
 @app.get("/")
 def home():
@@ -56,7 +62,10 @@ async def step(request: Request):
         "reward": result.reward,
         "done": result.done
     }
-    
+
+@app.get("/state")
+async def get_state():
+    return env.state()
 
 def main():
     port = int(os.environ.get("PORT", 7860))
