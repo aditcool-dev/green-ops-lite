@@ -1,6 +1,6 @@
 name: green-ops-lite
 description: Energy-efficient data center optimization environment
-version: 1.0
+version: "1.0"
 
 observation_space:
   type: object
@@ -19,14 +19,26 @@ observation_space:
       type: boolean
     step_count:
       type: integer
+  required:
+    - rack_temp
+    - cpu_load
+    - power_cost
+    - failed_fan
+    - step_count
 
 action_space:
   type: string
-  description: |
-    One of the following actions:
-    - increase_cooling(i)
-    - decrease_load(i)
-    - migrate_jobs(i,j)
+  enum:
+    - increase_cooling(0)
+    - increase_cooling(1)
+    - increase_cooling(2)
+    - decrease_load(0)
+    - decrease_load(1)
+    - decrease_load(2)
+    - migrate_jobs(0,1)
+    - migrate_jobs(1,2)
+    - migrate_jobs(2,0)
 
 reward:
   type: number
+  description: Continuous reward signal combining stability, uptime, and efficiency
