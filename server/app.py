@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi import Request
 from env.environment import GreenOpsEnv
 import uvicorn
 import os
@@ -14,14 +15,21 @@ def home():
         "endpoints": ["/reset", "/step?action=..."]
     }
 
-@app.get("/reset")
-def reset(task: str = "easy"):
+@app.post("/reset")
+async def reset(request: Request):
+    data = await request.json() if request.method == "POST" else {}
+    task = data.get("task", "easy")
+
     obs = env.reset(task)
     return {"observation": obs.dict()}
 
-@app.get("/step")
-def step(action: str):
+@app.post("/step")
+async def step(request: Request):
+    data = await request.json()
+    action = data.get("action")
+
     result = env.step(action)
+
     return {
         "observation": result.observation.dict(),
         "reward": result.reward,
