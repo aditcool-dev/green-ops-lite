@@ -1,3 +1,13 @@
+---
+title: Green Ops Lite
+emoji: 🌱
+colorFrom: green
+colorTo: blue
+sdk: docker
+app_file: app.py
+pinned: false
+---
+
 # 🌱 Green-Ops Lite: Energy-Efficient Data Center Optimization Environment
 
 ## 🚀 Overview
