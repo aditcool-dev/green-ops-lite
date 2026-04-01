@@ -1,0 +1,16 @@
+[project]
+name = "green-ops-lite"
+version = "0.1.0"
+description = "Energy-efficient data center optimization OpenEnv environment"
+authors = [{ name = "Adit Rastogi" }]
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "openai",
+    "requests"
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
