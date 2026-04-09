@@ -1,5 +1,4 @@
 ---
-
 title: A multi-objective reinforcement learning environment for optimizing data center energy efficiency and reliability.
 emoji: 🌱
 colorFrom: green
@@ -8,7 +7,7 @@ sdk: docker
 app_file: app.py
 app_port: 7860
 pinned: false
--------------
+---
 
 # 🌱 Green-Ops Lite: Intelligent Data Center Optimization Environment
 
