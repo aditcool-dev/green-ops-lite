@@ -9,37 +9,37 @@ app_port: 7860
 pinned: false
 ---
 
-# 🌱 Green-Ops Lite: Intelligent Data Center Optimization Environment
-
-> 🚀 A physics-inspired reinforcement learning environment that models real-world data center failures, enabling AI agents to optimize energy, stability, and uptime under cascading thermal constraints.
+# 🌱 Green-Ops Lite: Energy-Efficient Data Center Optimization Environment
 
 ## 🚀 Overview
 
-**Green-Ops Lite** is an OpenEnv-compliant simulation environment for training AI agents to manage **energy-efficient and reliable data center operations**.
+**Green-Ops Lite** is an OpenEnv-compliant simulation environment designed to train and evaluate AI agents on **energy-efficient data center operations**.
 
-It models real-world infrastructure challenges where systems must balance:
+Modern data centers must balance:
 
 * 🔥 Thermal stability
 * ⚡ Energy efficiency
 * 🖥️ System uptime
 
-Unlike toy RL environments, Green-Ops Lite introduces **physics-inspired dynamics and multi-objective optimization**, making it closer to real production systems.
+This environment models these competing objectives and challenges agents to make intelligent decisions under dynamic conditions.
 
 ---
 
-## 🎯 Why This Matters
+## 🎯 Motivation
 
-Modern AI infrastructure consumes massive energy. Efficient cooling and workload distribution are critical for:
+Large-scale infrastructure (e.g., hyperscale data centers) faces constant trade-offs between performance and sustainability.
 
-* Reducing operational costs
-* Preventing hardware failures
-* Improving sustainability
+> Our goal is to simulate a realistic decision-making environment where AI agents can optimize:
 
-> This project simulates real-world **SRE + Green AI decision-making** under constraints.
+* Cooling strategies
+* Workload distribution
+* Power consumption
+
+This reflects real-world challenges in **Site Reliability Engineering (SRE)** and **Green AI infrastructure**.
 
 ---
 
-## 🧠 System Architecture
+### System Architecture
 
 ```mermaid
 graph LR
@@ -48,8 +48,8 @@ graph LR
         B -->|Cascading Heat| C[Rack 2]
     end
     
-    subgraph "Agent Loop"
-        D[AI Agent]
+    subgraph "Agent Interaction"
+        D[Baseline Agent]
         E[GreenOps Environment]
     end
     
@@ -64,6 +64,8 @@ graph LR
 
 ### 📊 State (Observation)
 
+Each step provides:
+
 ```json
 {
   "rack_temp": [float, float, float],
@@ -74,9 +76,16 @@ graph LR
 }
 ```
 
+* `rack_temp` → Temperature of each rack (°C)
+* `cpu_load` → Load per rack (0–1)
+* `power_cost` → Energy consumption proxy
+* `failed_fan` → Simulates hardware failure (hard task)
+
 ---
 
 ### ⚙️ Action Space
+
+Agents can choose from:
 
 ```
 increase_cooling(i)
@@ -84,118 +93,138 @@ decrease_load(i)
 migrate_jobs(i, j)
 ```
 
+Where:
+
+* `i`, `j` ∈ {0, 1, 2}
+
 ---
 
-## 🔥 Physics-Inspired Dynamics (Key Highlight)
+### 🔄 Environment Dynamics
 
-Green-Ops Lite goes beyond linear environments:
-
-### ✅ Non-linear thermal behavior
-
-* Heat increases with load
-* **Exponential thermal runaway** at high temperatures
-
-### ✅ Cascading failures
-
-* Fan failure in Rack 0 → heat spreads to Rack 1
-* Creates real-world **failure propagation**
-
-### ✅ Trade-offs
-
+* Temperature increases with CPU load
 * Cooling reduces temperature but increases power cost
-* Load balancing reduces hotspots but impacts throughput
+* Load balancing redistributes heat
+* Fan failure introduces cascading thermal effects
 
 ---
 
-## 🧪 Tasks & Difficulty
+## 🧪 Tasks & Difficulty Levels
 
-| Level     | Description                       |
-| --------- | --------------------------------- |
-| 🟢 Easy   | Stable system, basic cooling      |
-| 🟡 Medium | Requires balancing load + cooling |
-| 🔴 Hard   | Fan failure + cascading heat      |
+### 🟢 Easy — Reactive Cooling
+
+* Moderate temperatures
+* No failures
+* Goal: stabilize system quickly
+
+---
+
+### 🟡 Medium — Load Management
+
+* Higher baseline load
+* Requires balancing cooling vs load reduction
+
+---
+
+### 🔴 Hard — Cascading Failure Scenario
+
+* Fan failure in Rack 0
+* Rising temperatures across racks
+* Requires multi-step reasoning:
+
+  * Cooling + load balancing
+  * Avoiding thermal runaway
 
 ---
 
 ## 🧠 Reward Function
 
-Multi-objective optimization:
-
-```
-Reward = 0.45 × Stability 
-       + 0.30 × Uptime 
-       + 0.25 × Efficiency
-```
-
-### Signals:
-
-* Penalizes overheating (>90°C)
-* Rewards balanced cooling
-* Encourages energy efficiency
-
----
-
-## 🤖 Hybrid Baseline Agent
-
-A **robust hybrid agent** combining:
-
-### 🔹 LLM Reasoning
-
-* Interprets system state
-* Suggests actions
-
-### 🔹 Rule-Based Safety Layer
-
-* Prevents catastrophic decisions
-* Handles edge cases reliably
-
-> This design ensures **robust performance even if LLM fails**
-
----
-
-### **"Baseline Agent Performance"**
+The reward models **multi-objective optimization**:
 
 ```text
-Easy   → 0.41+
-Medium → 0.40+
-Hard   → 0.32+
+Reward = 
+  0.45 × Stability +
+  0.30 × Uptime +
+  0.25 × Efficiency
 ```
 
-### Key Insights:
+### Components:
 
-* ✅ Stable across all tasks
-* ✅ Handles cascading failures
-* ✅ Balances efficiency + performance
+* **Stability** → Smooth temperature-based scoring
+* **Uptime** → Penalizes unsafe thermal states
+* **Efficiency** → Encourages lower power usage
 
----
+### Additional Signals:
 
-## ⚙️ OpenEnv Compliance
-
-* ✔ reset()
-* ✔ step()
-* ✔ typed observations
-* ✔ deterministic grading
-* ✔ Docker-ready deployment
+* Bonus for optimal cooling
+* Penalty for overheating (>90°C)
+* Step penalty to encourage efficiency
 
 ---
 
-## 🚀 How to Run
+## 🤖 Baseline Agent
 
-### 1. Install
+We provide a hybrid baseline agent using:
+
+* LLM reasoning (via OpenAI-compatible API)
+* Rule-based overrides for critical decisions
+
+### Key Features:
+
+* Deterministic behavior
+* Robust action parsing
+* Handles multi-step decision making
+
+---
+
+## 📈 Baseline Results
+
+```text
+Easy   → 0.4633
+Medium → 0.4044
+Hard   → 0.0778
+```
+
+These results demonstrate:
+
+* Strong performance on simple tasks
+* Gradual degradation with increasing difficulty
+* Non-trivial challenge in hard scenarios
+
+---
+
+## 🏗️ OpenEnv Compliance
+
+This environment fully implements:
+
+* `reset()`
+* `step()`
+* `state()`
+* Typed models (Pydantic)
+* `openenv.yaml` specification
+
+---
+
+## ⚙️ Setup & Usage
+
+### 1. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
+---
+
 ### 2. Set environment variables
 
 ```bash
-API_BASE_URL=<endpoint>
-MODEL_NAME=<model>
-HF_TOKEN=<api_key>
+API_BASE_URL=<your_api_endpoint>
+MODEL_NAME=<model_name>
+HF_TOKEN=<your_api_key>
 ```
 
-### 3. Run
+---
+
+### 3. Run inference
 
 ```bash
 python inference.py
@@ -205,6 +234,8 @@ python inference.py
 
 ## 🐳 Docker
 
+Build and run:
+
 ```bash
 docker build -t greenops .
 docker run greenops
@@ -212,29 +243,28 @@ docker run greenops
 
 ---
 
-## 🌍 Real-World Impact
+## 🌍 Real-World Relevance
 
-This environment simulates challenges faced by:
+Green-Ops Lite simulates real challenges faced by:
 
 * Hyperscale cloud providers
 * AI infrastructure teams
-* SRE / DevOps engineers
+* SRE and DevOps engineers
 
-### Enables research in:
+It enables research into:
 
 * Energy-aware AI agents
-* Autonomous infrastructure control
-* Sustainable computing
+* Autonomous infrastructure management
+* Sustainable computing systems
 
 ---
 
 ## 💡 Key Contributions
 
-* Multi-objective RL benchmark for infrastructure
-* Physics-inspired thermal modeling
-* Cascading failure simulation
-* Hybrid AI + control system design
-* Robust evaluator-compliant implementation
+* Multi-objective RL environment for infrastructure optimization
+* Deterministic, reproducible evaluation
+* Realistic thermal and workload dynamics
+* Scalable framework for agent benchmarking
 
 ---
 
@@ -242,23 +272,33 @@ This environment simulates challenges faced by:
 
 Green-Ops Lite bridges the gap between:
 
-* Reinforcement learning research
-* Real-world infrastructure optimization
+* Reinforcement learning environments
+* Real-world infrastructure challenges
 
-It provides a **practical, scalable benchmark** for building intelligent systems that operate under real-world constraints.
+It provides a **practical, research-aligned benchmark** for evaluating intelligent agents in complex operational systems.
 
----
-
-## 📬 Contact
-
-**Adit Rastogi**
-📧 [aditrastogi11@gmail.com](mailto:aditrastogi11@gmail.com)
+Designed to simulate real-world infrastructure decisions under uncertainty, Green-Ops Lite provides a benchmark for evaluating intelligent agents in sustainability-critical systems.
 
 ---
 
-## 🙌 Acknowledgements
+## 📬 Contact / Team
 
-* Meta AI Hackathon
-* Hugging Face OpenEnv
+Adit Rastogi
+📧 Email: aditrastogi11@gmail.com
+
+---
+
+📄 License
+
+This project is developed for the Meta × Hugging Face OpenEnv Hackathon.
+
+---
+
+🙌 Acknowledgements
+
+Special thanks to:
+
+Meta AI Hackathon organizers
+Hugging Face Spaces & OpenEnv framework
 
 ---
