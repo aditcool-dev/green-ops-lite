@@ -11,6 +11,8 @@ pinned: false
 
 # 🌱 Green-Ops Lite: Energy-Efficient Data Center Optimization Environment
 
+> 🚀 A physics-inspired reinforcement learning environment that models real-world data center failures, enabling AI agents to optimize energy, stability, and uptime under cascading thermal constraints.
+
 ## 🚀 Overview
 
 **Green-Ops Lite** is an OpenEnv-compliant simulation environment designed to train and evaluate AI agents on **energy-efficient data center operations**.
@@ -190,6 +192,8 @@ These results demonstrate:
 * Gradual degradation with increasing difficulty
 * Non-trivial challenge in hard scenarios
 
+> The agent demonstrates stable performance across all difficulty levels, including recovery under cascading failure conditions in the hard scenario.
+
 ---
 
 ## 🏗️ OpenEnv Compliance
@@ -245,7 +249,7 @@ docker run greenops
 
 ## 🌍 Real-World Relevance
 
-Green-Ops Lite simulates real challenges faced by:
+This environment models challenges faced by:
 
 * Hyperscale cloud providers
 * AI infrastructure teams
@@ -277,7 +281,7 @@ Green-Ops Lite bridges the gap between:
 
 It provides a **practical, research-aligned benchmark** for evaluating intelligent agents in complex operational systems.
 
-Designed to simulate real-world infrastructure decisions under uncertainty, Green-Ops Lite provides a benchmark for evaluating intelligent agents in sustainability-critical systems.
+> 🚀 A physics-inspired reinforcement learning environment that models real-world data center failures, enabling AI agents to optimize energy, stability, and uptime under cascading thermal constraints.
 
 ---
 
