@@ -149,9 +149,7 @@ Action:
     parsed = extract_action(action)
     if parsed:
         last_actions.append(parsed)
-    else:
-        last_actions.append("fallback")
-
+    
     # --- UPGRADED FALLBACK LOGIC ---
     temps = observation.rack_temp
     loads = observation.cpu_load
