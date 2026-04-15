@@ -69,10 +69,10 @@ IMPORTANT:
 Recent History:
 
 Previous Actions:
-{last_actions}
+{actions_str}
 
 Previous Rewards:
-{last_rewards}
+{rewards_str}
 
 --------------------------------------------------
 Physics & Rules:
