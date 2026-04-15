@@ -17,6 +17,7 @@ client = OpenAI(
 )
 
 last_actions = []
+last_rewards = []
 
 MAX_STEPS = 10
 
@@ -31,8 +32,14 @@ def extract_action(action_text):
 
 
 def get_action(observation):
-    global last_actions
+    global last_actions, last_rewards
     
+    recent_actions = last_actions[-3:] if len(last_actions) >= 3 else last_actions
+    recent_rewards = last_rewards[-3:] if len(last_rewards) >= 3 else last_rewards
+
+    actions_str = ", ".join(recent_actions) if recent_actions else "None"
+    rewards_str = ", ".join([f"{r:.2f}" for r in recent_rewards]) if recent_rewards else "None"
+
     prompt = f"""
 You are an expert AI Site Reliability Engineer managing a data center with 3 server racks.
 
@@ -54,65 +61,65 @@ Fan Failure Status:
 
 IMPORTANT:
 - If failed_fan = 0 → Rack 0 cooling is permanently degraded
-- Cooling Rack 0 is LESS effective than normal
-- Heat from Rack 0 can spread to other racks (cascading failure risk)
+- Cooling Rack 0 is less effective
+- Heat from Rack 0 spreads → cascading failure risk
+- PRIORITY: move load away from Rack 0 early
+
+--------------------------------------------------
+Recent History:
+
+Previous Actions:
+{last_actions}
+
+Previous Rewards:
+{last_rewards}
 
 --------------------------------------------------
 Physics & Rules:
 
-1. High CPU load generates heat.
-2. Temp > 75°C causes exponential thermal runaway.
+1. High CPU load generates heat
+2. Temp > 75°C → exponential thermal runaway
 3. increase_cooling(x):
    - Reduces temperature
-   - But wastes power (efficiency penalty)
+   - Costs energy (efficiency penalty)
 4. decrease_load(x):
    - Reduces temperature
-   - But reduces throughput (penalty)
+   - Reduces throughput (penalty)
 5. migrate_jobs(source, target):
-   - Moves load from hot rack to cool rack
-   - BEST action for balancing system
+   - Moves load from hot → cool rack
+   - BEST for efficiency + stability
 
 --------------------------------------------------
 Strategy Guidelines:
 
-- If a rack is critically hot (>75°C):
-  → Use increase_cooling(x) ONLY as emergency action
+- Always consider FULL system, not one rack
 
-- If failed_fan = 0 (Rack 0 failure):
-  → PRIORITY: move load away from Rack 0 using migrate_jobs
+- If ANY rack > 90°C:
+  → IMMEDIATE ACTION: increase_cooling(x)
+  → Do NOT continue migrating
+
+- If failed_fan = 0:
+  → Move load away from Rack 0 ASAP
   → Avoid relying on cooling Rack 0
 
-- Always move load from hottest rack → coolest rack
+- Prefer migrate_jobs over increase_cooling when safe
 
-- Prefer migrate_jobs over increase_cooling whenever possible
+- Move load from HOTTEST rack → COOLEST rack
 
-- Use decrease_load ONLY if load > 0.85 and no better option exists
+- If temperatures keep increasing after migration:
+  → SWITCH strategy (use cooling)
 
---------------------------------------------------
-Examples:
-
-State:
-Temps = [85, 60, 55], Loads = [0.9, 0.3, 0.2], failed_fan = 0
-Correct Action:
-migrate_jobs(0,1)
-
----
-
-State:
-Temps = [78, 77, 76], Loads = [0.7, 0.6, 0.5], failed_fan = 1
-Correct Action:
-increase_cooling(0)
-
----
-
-State:
-Temps = [72, 65, 60], Loads = [0.85, 0.4, 0.3], failed_fan = 0
-Correct Action:
-migrate_jobs(0,2)
+- Use decrease_load ONLY if load > 0.85 AND no better option
 
 --------------------------------------------------
+Anti-Repetition Rule:
 
+- DO NOT repeat the same action consecutively
+- If the previous action did not improve reward, choose a different action
+
+--------------------------------------------------
 Available Actions:
+
 increase_cooling(0), increase_cooling(1), increase_cooling(2)
 decrease_load(0), decrease_load(1), decrease_load(2)
 migrate_jobs(0,1), migrate_jobs(1,2), migrate_jobs(2,0)
@@ -123,6 +130,7 @@ IMPORTANT:
 - Think step-by-step internally
 - Output ONLY ONE valid action
 - Do NOT explain
+- Output must EXACTLY match one of the available actions
 
 Action:
 """ 
@@ -138,8 +146,11 @@ Action:
     except Exception as e:
         action = ""
 
-    last_actions.append(action)
     parsed = extract_action(action)
+    if parsed:
+        last_actions.append(parsed)
+    else:
+        last_actions.append("fallback")
 
     # --- UPGRADED FALLBACK LOGIC ---
     temps = observation.rack_temp
@@ -183,8 +194,10 @@ def log_end(success, steps, rewards, final_score):
 
 
 def run_task(task):
-    global last_actions
+    global last_actions, last_rewards
     last_actions = []
+    last_rewards = []
+    
     env = GreenOpsEnv()
     obs = env.reset(task)
 
@@ -199,6 +212,7 @@ def run_task(task):
 
         reward = result.reward if result.reward is not None else 0.0
         rewards.append(reward)
+        last_rewards.append(reward) 
         steps = step
 
         log_step(step, action, reward, result.done)
