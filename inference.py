@@ -92,30 +92,39 @@ Physics & Rules:
 --------------------------------------------------
 Strategy Guidelines:
 
-- Always consider FULL system, not one rack
+- Always consider the FULL system, not just one rack
 
-- If ANY rack > 90°C:
+- EARLY WARNING:
+  If any rack > 85°C:
+  → Take PREEMPTIVE action using increase_cooling(x)
+
+- EMERGENCY:
+  If any rack > 90°C:
   → IMMEDIATE ACTION: increase_cooling(x)
   → Do NOT continue migrating
 
 - If failed_fan = 0:
-  → Move load away from Rack 0 ASAP
+  → Move load away from Rack 0 as early as possible
   → Avoid relying on cooling Rack 0
 
 - Prefer migrate_jobs over increase_cooling when safe
 
 - Move load from HOTTEST rack → COOLEST rack
 
-- If temperatures keep increasing after migration:
-  → SWITCH strategy (use cooling)
+- If recent rewards are decreasing:
+  → Current strategy is failing
+  → SWITCH strategy immediately
 
-- Use decrease_load ONLY if load > 0.85 AND no better option
+- If temperatures continue rising after migration:
+  → STOP migrating and use cooling
+
+- Use decrease_load ONLY if load > 0.85 AND no better option exists
 
 --------------------------------------------------
 Anti-Repetition Rule:
 
-- DO NOT repeat the same action consecutively
-- If the previous action did not improve reward, choose a different action
+- DO NOT repeat the same action more than 2 times
+- If repeated actions do not improve reward → MUST change strategy
 
 --------------------------------------------------
 Available Actions:
