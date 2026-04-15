@@ -34,31 +34,96 @@ def get_action(observation):
     global last_actions
     
     prompt = f"""
-You are an AI Site Reliability Engineer managing a data center with 3 server racks.
+You are an expert AI Site Reliability Engineer managing a data center with 3 server racks.
 
+Your goal is to:
+- Prevent overheating (>75°C)
+- Maintain system stability
+- Minimize power usage
+- Avoid cascading failures
+
+--------------------------------------------------
 Current State:
+
 Rack 0 → Temp: {observation.rack_temp[0]:.1f}°C, Load: {observation.cpu_load[0]:.2f}
 Rack 1 → Temp: {observation.rack_temp[1]:.1f}°C, Load: {observation.cpu_load[1]:.2f}
 Rack 2 → Temp: {observation.rack_temp[2]:.1f}°C, Load: {observation.cpu_load[2]:.2f}
 
-Physics & Rules:
-1. High CPU load generates heat. Temp > 75°C causes exponential thermal runaway.
-2. increase_cooling(x) drops temperature but WASTES power (lowers efficiency score).
-3. decrease_load(x) drops temperature but DESTROYS throughput (lowers throughput score).
-4. migrate_jobs(source, target) moves load from a hot rack to a cool rack. This saves power AND maintains throughput. This is your best tool.
+Fan Failure Status:
+- failed_fan: {observation.failed_fan}
 
-Instructions:
-- If a rack is critically hot (>75°C), use increase_cooling(x).
-- If Rack 0 is broken, use migrate_jobs(0, safe_rack).
-- To manage normal heat, use migrate_jobs to move load from the hottest rack to the coolest rack.
-- Only use decrease_load(x) if a rack's load is extremely high (>0.85).
+IMPORTANT:
+- If failed_fan = 0 → Rack 0 cooling is permanently degraded
+- Cooling Rack 0 is LESS effective than normal
+- Heat from Rack 0 can spread to other racks (cascading failure risk)
+
+--------------------------------------------------
+Physics & Rules:
+
+1. High CPU load generates heat.
+2. Temp > 75°C causes exponential thermal runaway.
+3. increase_cooling(x):
+   - Reduces temperature
+   - But wastes power (efficiency penalty)
+4. decrease_load(x):
+   - Reduces temperature
+   - But reduces throughput (penalty)
+5. migrate_jobs(source, target):
+   - Moves load from hot rack to cool rack
+   - BEST action for balancing system
+
+--------------------------------------------------
+Strategy Guidelines:
+
+- If a rack is critically hot (>75°C):
+  → Use increase_cooling(x) ONLY as emergency action
+
+- If failed_fan = 0 (Rack 0 failure):
+  → PRIORITY: move load away from Rack 0 using migrate_jobs
+  → Avoid relying on cooling Rack 0
+
+- Always move load from hottest rack → coolest rack
+
+- Prefer migrate_jobs over increase_cooling whenever possible
+
+- Use decrease_load ONLY if load > 0.85 and no better option exists
+
+--------------------------------------------------
+Examples:
+
+State:
+Temps = [85, 60, 55], Loads = [0.9, 0.3, 0.2], failed_fan = 0
+Correct Action:
+migrate_jobs(0,1)
+
+---
+
+State:
+Temps = [78, 77, 76], Loads = [0.7, 0.6, 0.5], failed_fan = 1
+Correct Action:
+increase_cooling(0)
+
+---
+
+State:
+Temps = [72, 65, 60], Loads = [0.85, 0.4, 0.3], failed_fan = 0
+Correct Action:
+migrate_jobs(0,2)
+
+--------------------------------------------------
 
 Available Actions:
 increase_cooling(0), increase_cooling(1), increase_cooling(2)
 decrease_load(0), decrease_load(1), decrease_load(2)
 migrate_jobs(0,1), migrate_jobs(1,2), migrate_jobs(2,0)
 
-IMPORTANT: Think step-by-step internally, but output ONLY ONE valid action.
+--------------------------------------------------
+
+IMPORTANT:
+- Think step-by-step internally
+- Output ONLY ONE valid action
+- Do NOT explain
+
 Action:
 """ 
     
