@@ -170,59 +170,72 @@ Action:
 
     parsed = extract_action(action)
     
-    # --- UPGRADED FALLBACK LOGIC ---
+    # -----------------------------
+    # HYBRID CONTROL LAYER (FINAL)
+    # -----------------------------
+
     temps = observation.rack_temp
     loads = observation.cpu_load
     is_hard = getattr(observation, "failed_fan", False)
 
+    hottest = temps.index(max(temps))
+    coolest = temps.index(min(temps))
     max_temp = max(temps)
-    max_temp_idx = temps.index(max_temp)
-    safe_targets = [i for i in range(3) if temps[i] < 70]
-    target = min(safe_targets, key=lambda i: temps[i]) if safe_targets else temps.index(min(temps))
 
-    # USE LLM ACTION (If valid)
-    final_action = None
-    if parsed:
-        temps = observation.rack_temp
-        max_temp = max(temps)
-        hottest = temps.index(max_temp)
+    # 🔮 prediction
+    predicted = [temps[i] + loads[i]*8 for i in range(3)]
+    predicted_max = max(predicted)
+    predicted_hot = predicted.index(predicted_max)
 
-        if max_temp > 90:
-            final_action = f"increase_cooling({hottest})"
-        elif max_temp > 85:
-            final_action = f"increase_cooling({hottest})"
+    last_action = last_actions[-1] if last_actions else None
+    reward_trend_bad = (
+        len(last_rewards) >= 2 and last_rewards[-1] < last_rewards[-2]
+    )
+
+    # -----------------------------
+    # 1. EMERGENCY OVERRIDE
+    # -----------------------------
+    if max_temp > 92 or predicted_max > 95:
+        final_action = f"increase_cooling({hottest})"
+
+    # -----------------------------
+    # 2. PRE-EMPTIVE COOLING
+    # -----------------------------
+    elif predicted_max > 85:
+        final_action = f"increase_cooling({predicted_hot})"
+
+    # -----------------------------
+    # 3. HARD MODE
+    # -----------------------------
+    elif is_hard and loads[0] > 0.25 and temps[0] > 68 and coolest != 0:
+        final_action = f"migrate_jobs(0,{coolest})"
+
+    # -----------------------------
+    # 4. USE LLM (IF SAFE)
+    # -----------------------------
+    elif parsed:
+        # avoid repeating bad action
+        if parsed == last_action or reward_trend_bad:
+            if max_temp > 75:
+                final_action = f"increase_cooling({hottest})"
+            else:
+                final_action = f"migrate_jobs({hottest},{coolest})"
         else:
             final_action = parsed
 
-        last_actions.append(final_action)
-        return final_action
+    # -----------------------------
+    # 5. FALLBACK
+    # -----------------------------
+    else:
+        if max_temp > 80:
+            final_action = f"increase_cooling({hottest})"
+        else:
+            final_action = f"migrate_jobs({hottest},{coolest})"
 
-    # 2. OVERRIDE / FALLBACK LOGIC
+    # store
+    last_actions.append(final_action)
 
-    if is_hard and temps[0] > 70.0 and loads[0] > 0.1 and target != 0:
-        action = f"migrate_jobs(0,{target})"
-        last_actions.append(action)
-        return action
-        
-    if max_temp > 75.0:
-        action = f"increase_cooling({max_temp_idx})"
-        last_actions.append(action)
-        return action
-        
-    if max_temp > 68.0 and loads[max_temp_idx] > 0.2 and target != max_temp_idx:
-        action = f"migrate_jobs({max_temp_idx},{target})"
-        last_actions.append(action)
-        return action
-        
-    max_load_idx = loads.index(max(loads))
-    if max(loads) > 0.85:
-        action = f"decrease_load({max_load_idx})"
-        last_actions.append(action)
-        return action
-
-    action = f"increase_cooling({max_temp_idx})"
-    last_actions.append(action)
-    return action
+    return final_action
     
 def log_start(task, model):
     print(f"[START] task={task} env=greenops model={model}", flush=True)
