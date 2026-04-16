@@ -75,56 +75,69 @@ Previous Rewards:
 {rewards_str}
 
 --------------------------------------------------
+PRIORITY ORDER (STRICT — ALWAYS FOLLOW):
+
+1. SYSTEM SAFETY (highest priority)
+2. STABILITY (avoid rising temperatures)
+3. EFFICIENCY (minimize power usage)
+
+--------------------------------------------------
+CRITICAL SAFETY RULES (NON-NEGOTIABLE):
+
+- If ANY rack temperature > 90°C:
+  → YOU MUST use increase_cooling(x)
+  → IGNORE all other strategies
+  → This is an emergency
+
+- If ANY rack temperature > 85°C:
+  → Cooling is STRONGLY preferred over migration
+  → Do NOT continue repeated migrations
+
+--------------------------------------------------
 Physics & Rules:
 
 1. High CPU load generates heat
 2. Temp > 75°C → exponential thermal runaway
 3. increase_cooling(x):
    - Reduces temperature
-   - Costs energy (efficiency penalty)
+   - Costs energy
 4. decrease_load(x):
    - Reduces temperature
-   - Reduces throughput (penalty)
+   - Reduces throughput
 5. migrate_jobs(source, target):
    - Moves load from hot → cool rack
-   - BEST for efficiency + stability
+   - Best for efficiency when system is stable
 
 --------------------------------------------------
 Strategy Guidelines:
 
-- Always consider the FULL system, not just one rack
-
-- EARLY WARNING:
-  If any rack > 85°C:
-  → Take PREEMPTIVE action using increase_cooling(x)
-
-- EMERGENCY:
-  If any rack > 90°C:
-  → IMMEDIATE ACTION: increase_cooling(x)
-  → Do NOT continue migrating
-
-- If failed_fan = 0:
-  → Move load away from Rack 0 as early as possible
-  → Avoid relying on cooling Rack 0
-
-- Prefer migrate_jobs over increase_cooling when safe
+- Always consider the FULL system
 
 - Move load from HOTTEST rack → COOLEST rack
+
+- Prefer migrate_jobs ONLY when temperatures are under control (<85°C)
+
+- If temperatures are rising across steps:
+  → STOP migration
+  → SWITCH to cooling
 
 - If recent rewards are decreasing:
   → Current strategy is failing
   → SWITCH strategy immediately
 
-- If temperatures continue rising after migration:
-  → STOP migrating and use cooling
+- If failed_fan = 0:
+  → Move load away from Rack 0 early
+  → Avoid relying on cooling Rack 0
 
 - Use decrease_load ONLY if load > 0.85 AND no better option exists
 
 --------------------------------------------------
-Anti-Repetition Rule:
+Anti-Repetition Rules:
 
 - DO NOT repeat the same action more than 2 times
-- If repeated actions do not improve reward → MUST change strategy
+- If repeating migrate_jobs does not reduce temperature:
+  → STOP migration
+  → USE cooling instead
 
 --------------------------------------------------
 Available Actions:
