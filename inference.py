@@ -169,8 +169,6 @@ Action:
         action = ""
 
     parsed = extract_action(action)
-    if parsed:
-        last_actions.append(parsed)
     
     # --- UPGRADED FALLBACK LOGIC ---
     temps = observation.rack_temp
@@ -183,7 +181,19 @@ Action:
     target = min(safe_targets, key=lambda i: temps[i]) if safe_targets else temps.index(min(temps))
 
     # USE LLM ACTION (If valid)
+    final_action = None
     if parsed:
+        temps = observation.rack_temp
+        max_temp = max(temps)
+        hottest = temps.index(max_temp)
+
+        if max_temp > 90:
+            return f"increase_cooling({hottest})"
+
+        if max_temp > 85:
+            return f"increase_cooling({hottest})"
+        
+        last_actions.append(final_action)
         return parsed
 
     # 2. OVERRIDE / FALLBACK LOGIC
