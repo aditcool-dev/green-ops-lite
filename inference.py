@@ -37,7 +37,7 @@ def get_action(observation):
     recent_actions = last_actions[-3:] if len(last_actions) >= 3 else last_actions
     recent_rewards = last_rewards[-3:] if len(last_rewards) >= 3 else last_rewards
 
-    actions_str = ", ".join([a for a in recent_actions if isinstance(a, str)]) if recent_actions else "None"
+    actions_str = ", ".join([str(a) for a in recent_actions if a is not None]) if recent_actions else "None"
     rewards_str = ", ".join([f"{r:.2f}" for r in recent_rewards]) if recent_rewards else "None"
 
     prompt = f"""
@@ -198,20 +198,31 @@ Action:
         return final_action
 
     # 2. OVERRIDE / FALLBACK LOGIC
+
     if is_hard and temps[0] > 70.0 and loads[0] > 0.1 and target != 0:
-        return f"migrate_jobs(0,{target})"
+        action = f"migrate_jobs(0,{target})"
+        last_actions.append(action)
+        return action
         
     if max_temp > 75.0:
-        return f"increase_cooling({max_temp_idx})"
+        action = f"increase_cooling({max_temp_idx})"
+        last_actions.append(action)
+        return action
         
     if max_temp > 68.0 and loads[max_temp_idx] > 0.2 and target != max_temp_idx:
-        return f"migrate_jobs({max_temp_idx},{target})"
+        action = f"migrate_jobs({max_temp_idx},{target})"
+        last_actions.append(action)
+        return action
         
     max_load_idx = loads.index(max(loads))
     if max(loads) > 0.85:
-        return f"decrease_load({max_load_idx})"
+        action = f"decrease_load({max_load_idx})"
+        last_actions.append(action)
+        return action
 
-    return f"increase_cooling({max_temp_idx})"
+    action = f"increase_cooling({max_temp_idx})"
+    last_actions.append(action)
+    return action
     
 def log_start(task, model):
     print(f"[START] task={task} env=greenops model={model}", flush=True)
