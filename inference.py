@@ -188,13 +188,14 @@ Action:
         hottest = temps.index(max_temp)
 
         if max_temp > 90:
-            return f"increase_cooling({hottest})"
+            final_action = f"increase_cooling({hottest})"
+        elif max_temp > 85:
+            final_action = f"increase_cooling({hottest})"
+        else:
+            final_action = parsed
 
-        if max_temp > 85:
-            return f"increase_cooling({hottest})"
-        
         last_actions.append(final_action)
-        return parsed
+        return final_action
 
     # 2. OVERRIDE / FALLBACK LOGIC
     if is_hard and temps[0] > 70.0 and loads[0] > 0.1 and target != 0:
