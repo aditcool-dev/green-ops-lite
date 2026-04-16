@@ -37,7 +37,7 @@ def get_action(observation):
     recent_actions = last_actions[-3:] if len(last_actions) >= 3 else last_actions
     recent_rewards = last_rewards[-3:] if len(last_rewards) >= 3 else last_rewards
 
-    actions_str = ", ".join(recent_actions) if recent_actions else "None"
+    actions_str = ", ".join([a for a in recent_actions if isinstance(a, str)]) if recent_actions else "None"
     rewards_str = ", ".join([f"{r:.2f}" for r in recent_rewards]) if recent_rewards else "None"
 
     prompt = f"""
