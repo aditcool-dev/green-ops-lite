@@ -8,6 +8,7 @@ from openai import OpenAI
 from env.environment import GreenOpsEnv
 from env.grader import grade
 import numpy as np
+import random
 
 # ============================================================
 # CONFIGURATION
@@ -799,8 +800,21 @@ def get_action(obs, task) -> str:
 
     # Best migration targets — in hard mode rack 0 is never a destination
     _never_target   = {0} if fan else None
-    coolest         = _health.best_target(temps, loads, _roc,
-                                          exclude=hottest, never_target=_never_target)
+    candidates = sorted(
+        [i for i in range(len(loads)) if i != hottest and i != _never_target],
+        key=lambda i: (loads[i], temps[i])
+    )
+
+    if not candidates:
+        # fallback (should rarely happen)
+        coolest = int(np.argmin(loads))
+    else:
+        if random.random() < 0.7:
+            coolest = candidates[0]
+        else:
+            top_k = candidates[:2] if len(candidates) > 1 else candidates
+            coolest = random.choice(top_k)
+
     overall_coolest = temps.index(min(temps))
 
     # Physics lookahead
