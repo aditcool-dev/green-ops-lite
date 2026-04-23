@@ -1,28 +1,3 @@
-"""
-generate_data.py — GreenOps-X training data generator
-======================================================
-Generates fine-tuning data in Unsloth/TRL chat format from inference.py episode logs.
-
-Bugs fixed vs original:
-  [BUG-1] final_thermal/final_load always returned p1_thermal (never actual executed action)
-           → now uses step["final_action"] as the ground truth label
-  [BUG-2] hard threshold=0.32 never accepted any episode (scores are 0.24-0.27)
-           → lowered to 0.22 so hard episodes are actually captured
-  [BUG-3] flat dict format incompatible with Unsloth/TRL SFT trainer
-           → wrapped in {"messages": [...]} chat format
-  [BUG-4] zero overseer override examples (p2_override always null)
-           → added synthetic override examples generated from high-risk states
-  [BUG-5] 300 episodes × 35s sleep = 2.9 hours of idle time
-           → reduced NUM_EPISODES to 80 (early-exit fires well before this)
-
-New features:
-  [FEAT-1] Separate JSONL files for pass1 (actor) and pass2 (overseer) training
-  [FEAT-2] Synthetic override examples injected for overseer training
-  [FEAT-3] Train/validation split (90/10)
-  [FEAT-4] Rich context: predicted_temps, thermal_state, reward, step included
-  [FEAT-5] Data quality stats printed at end
-"""
-
 import subprocess
 import json
 import time
