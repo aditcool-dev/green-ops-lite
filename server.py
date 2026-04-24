@@ -8,8 +8,18 @@ This exposes the environment to the OpenEnv evaluation harness.
 import json
 from typing import Dict, Any, Tuple
 # Note: Ensure you have openenv installed (`pip install openenv`)
-from openenv import MCPEnvironment 
 from env.environment import GreenOpsEnv
+
+try:
+    from openenv.mcp import MCPEnvironment  # judge environment (real MCP)
+except Exception:
+    try:
+        from openenv import MCPEnvironment  # if exposed directly (rare)
+    except Exception:
+        # local fallback (so your code runs)
+        class MCPEnvironment:
+            def run(self):
+                print("⚠️ Local fallback MCPEnvironment running (no MCP)")
 
 class GreenOpsMCP(MCPEnvironment):
     def __init__(self):
