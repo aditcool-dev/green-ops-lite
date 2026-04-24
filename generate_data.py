@@ -9,15 +9,14 @@ from datetime import datetime
 # CONFIGURATION
 # ─────────────────────────────────────────────────────────────
 
-NUM_EPISODES    = 10       # Loop limit. Early-exit fires when all tasks hit MAX_PER_TASK.
+NUM_EPISODES    = 22       # Loop limit. Early-exit fires when all tasks hit MAX_PER_TASK.
 MAX_PER_TASK    = 50        # Target samples per task type
 VAL_FRACTION    = 0.10      # 10% held out as validation
 
-# [BUG-2 FIX] Lowered hard threshold from 0.32 to 0.22 (hard scores are 0.24-0.27)
 THRESHOLDS = {
-    "easy":   0.40,
-    "medium": 0.38,
-    "hard":   0.32,   
+    "easy":   0.41,
+    "medium": 0.39,
+    "hard":   0.37
 }
 
 ACTOR_TRAIN_FILE    = "actor_train.jsonl"
@@ -26,7 +25,7 @@ OVERSEER_TRAIN_FILE = "overseer_train.jsonl"
 OVERSEER_VAL_FILE   = "overseer_val.jsonl"
 STATS_FILE          = "generation_stats.json"
 
-GROQ_SLEEP_SECONDS  = 2   # Groq free tier: 30 RPM. Sleep between episodes.
+GROQ_SLEEP_SECONDS  = 35   # Groq free tier: 30 RPM. Sleep between episodes.
 
 # ─────────────────────────────────────────────────────────────
 # SYSTEM PROMPTS
@@ -63,9 +62,6 @@ OUTPUT: valid JSON only, no markdown."""
 # ─────────────────────────────────────────────────────────────
 # SYNTHETIC OVERRIDE EXAMPLES
 # ─────────────────────────────────────────────────────────────
-# [BUG-4 FIX] The real episodes produce p2_override=null for every step.
-# Injecting synthetic examples where override IS the correct answer so the
-# overseer model learns when to intervene, not just when to approve.
 
 def generate_synthetic_overseer_examples() -> list:
     """
@@ -246,13 +242,9 @@ def to_chat_sample(system: str, user: str, assistant: str) -> dict:
 # FILE HELPERS
 # ─────────────────────────────────────────────────────────────
 
-RESET_FILES = False
 def init_files():
     for f in [ACTOR_TRAIN_FILE, ACTOR_VAL_FILE, OVERSEER_TRAIN_FILE, OVERSEER_VAL_FILE]:
-        if RESET_FILES:
-            open(f, "w").close()   # wipe
-        else:
-            open(f, "a").close()   # append-safe
+        open(f, "a").close()
 
 
 def append_jsonl(filepath: str, record: dict):
@@ -274,7 +266,6 @@ def write_sample(sample: dict, val_fraction: float = VAL_FRACTION,
 # ─────────────────────────────────────────────────────────────
 
 def generate_dataset():
-    random.seed(42)
     init_files()
 
     task_counts: dict[str, int] = {"easy": 0, "medium": 0, "hard": 0}
@@ -282,7 +273,8 @@ def generate_dataset():
     rejected = 0
     start_time = datetime.now()
 
-    # [FEAT-2] Inject synthetic overseer examples first (balance the dataset)
+    seen_fingerprints: set = set()
+
     print("Injecting synthetic overseer examples...")
     synthetic = generate_synthetic_overseer_examples()
     for state, output in synthetic:
@@ -327,6 +319,14 @@ def generate_dataset():
                     print(f"REJECT {task}({score:.3f}<{threshold})", end=" ")
                     continue
 
+                action_seq = tuple(s.get("final_action", "") for s in summary.get("episode_log", []))
+                fingerprint = (task, action_seq)
+                if fingerprint in seen_fingerprints:
+                    rejected += 1
+                    print(f"DUPE {task}", end=" ")
+                    continue
+                seen_fingerprints.add(fingerprint)
+
                 print(f"ACCEPT {task}({score:.3f})", end=" ")
                 episode_accepted = True
 
@@ -362,7 +362,6 @@ def generate_dataset():
 
         print()  # newline after episode summary
 
-        # [BUG-5 FIX] Only sleep if we haven't hit all targets yet
         if not all(c >= MAX_PER_TASK for c in task_counts.values()):
             time.sleep(GROQ_SLEEP_SECONDS)
 

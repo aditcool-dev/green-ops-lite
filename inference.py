@@ -8,7 +8,9 @@ from openai import OpenAI
 from env.environment import GreenOpsEnv
 from env.grader import grade
 import numpy as np
-import random
+import random, time
+import os as _os
+random.seed(int.from_bytes(_os.urandom(8), "big"))
 
 # ============================================================
 # CONFIGURATION
@@ -628,7 +630,11 @@ OUTPUT — valid JSON only, no markdown, no explanation:
     content = _llm_call(
         messages=[{"role": "user", "content": prompt}],
         max_tokens=120,
-        temperature=0.15,
+        # [FIX-DIVERSITY] Raised from 0.15 → 0.6. At 0.15 the LLM outputs were
+        # near-deterministic, producing near-identical action sequences across episodes
+        # even when initial conditions varied. 0.6 gives genuine action diversity
+        # while still being grounded — good for LoRA fine-tuning data variety.
+        temperature=0.6,
     )
 
     hottest = obs.rack_temp.index(max(obs.rack_temp))
@@ -729,7 +735,10 @@ Note: if override_thermal is false, final_thermal MUST equal the original therma
     content = _llm_call(
         messages=[{"role": "user", "content": prompt}],
         max_tokens=160,
-        temperature=0.10,
+        # [FIX-DIVERSITY] Raised from 0.10 → 0.45. Overseer needs some variance
+        # to produce diverse override vs all_clear labels for training data.
+        # Kept lower than pass1 (0.6) since overseer safety decisions are more sensitive.
+        temperature=0.45,
     )
 
     if not content:

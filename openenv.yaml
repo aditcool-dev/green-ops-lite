@@ -1,6 +1,6 @@
-name: green-ops-lite
-description: Energy-efficient data center optimization environment
-version: "1.0"
+name: "greenops-x"
+description: "Multi-Agent Data Center Optimization with Thermal Cascade Physics and Hardware Failure"
+version: "1.0.0"
 
 observation_space:
   type: object
@@ -9,36 +9,29 @@ observation_space:
       type: array
       items:
         type: number
+      description: "Temperature of racks 0, 1, and 2 in Celsius"
     cpu_load:
       type: array
       items:
         type: number
+      description: "CPU load of racks 0, 1, and 2 (0.0 to 1.0)"
     power_cost:
       type: number
+      description: "Current power cost multiplier (baseline 1.0)"
     failed_fan:
       type: boolean
-    step_count:
-      type: integer
+      description: "If True, Rack 0 fan is broken causing rapid thermal cascade"
   required:
     - rack_temp
     - cpu_load
     - power_cost
     - failed_fan
-    - step_count
 
 action_space:
   type: string
-  enum:
-    - increase_cooling(0)
-    - increase_cooling(1)
-    - increase_cooling(2)
-    - decrease_load(0)
-    - decrease_load(1)
-    - decrease_load(2)
-    - migrate_jobs(0,1)
-    - migrate_jobs(1,2)
-    - migrate_jobs(2,0)
+  pattern: "^(increase_cooling\\([0-2]\\)|decrease_load\\([0-2]\\)|migrate_jobs\\([0-2],[0-2]\\))$"
+  description: "Actions: increase_cooling(N), decrease_load(N), or migrate_jobs(SRC,DST)"
 
 reward:
   type: number
-  description: Continuous reward signal combining stability, uptime, and efficiency
+  description: "Continuous signal combining thermal stability, efficiency, and throughput"

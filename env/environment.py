@@ -1,23 +1,8 @@
-"""
-env/environment.py — GreenOps-X
-=================================
-Fixes applied vs original:
-  [FIX-1] MAX_STEPS is now configurable via GreenOpsEnv(max_steps=N)
-           so inference.py's hard-task 15-step budget is actually respected.
-  [FIX-2] reset() default parameter changed from string "None" to Python None.
-  [FIX-3] Added reset(max_steps=...) override so run_task can set it per episode.
-  [FIX-4] Documented reward formula vs grader formula discrepancy inline.
-
-No changes to physics, reward, or grader logic — only structural fixes.
-"""
-
 import random
 import math
+import os
 from .models import Observation, StepResult
 
-random.seed(42)
-
-# [FIX-1] Module-level default only — class uses self.max_steps
 _DEFAULT_MAX_STEPS = 10
 TEMP_THRESHOLD = 70
 
@@ -29,20 +14,17 @@ class GreenOpsEnv:
         self.max_steps = max_steps
         self.reset()
 
-    def reset(self, task_name: str | None = None, max_steps: int | None = None):
-        # [FIX-2] Changed default from "None" (string) to None (Python object)
-        #         so `if task_name is None` now correctly triggers.
+    def reset(self, task_name: str | None = None, max_steps: int | None = None,
+              jitter: bool = True):
         if task_name is None:
             task_name = "easy"
 
-        # [FIX-3] Allow per-episode step budget override (used by run_task for hard mode)
         if max_steps is not None:
             self.max_steps = max_steps
 
         self.task_name = task_name
         self.step_count = 0
 
-        # Default / easy initial state
         self.rack_temp  = [75.0, 80.0, 65.0]
         self.cpu_load   = [0.7,  0.9,  0.5]
         self.power_cost = 1.0
@@ -56,6 +38,12 @@ class GreenOpsEnv:
         if task_name == "medium":
             self.rack_temp  = [78.0, 75.0, 70.0]
             self.cpu_load   = [0.8,  0.75, 0.7]
+
+        if jitter:
+            self.rack_temp  = [t + random.uniform(-3.0, 3.0) for t in self.rack_temp]
+            self.cpu_load   = [max(0.1, min(0.98, l + random.uniform(-0.08, 0.08)))
+                               for l in self.cpu_load]
+            self.power_cost = round(self.power_cost + random.uniform(-0.05, 0.05), 3)
 
         return self._get_obs()
 
@@ -131,7 +119,6 @@ class GreenOpsEnv:
         reward = self._compute_reward()
 
         # ---- Done ----
-        # [FIX-1] Uses self.max_steps instead of module-level MAX_STEPS constant
         done = self.step_count >= self.max_steps or self._is_stable()
 
         return StepResult(
