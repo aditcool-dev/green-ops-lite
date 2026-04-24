@@ -9,14 +9,20 @@ observation_space:
       type: array
       items:
         type: number
+        minimum: 0
+        maximum: 200
       description: "Temperature of racks 0, 1, and 2 in Celsius"
     cpu_load:
       type: array
       items:
         type: number
+        minimum: 0.0
+        maximum: 1.0
       description: "CPU load of racks 0, 1, and 2 (0.0 to 1.0)"
     power_cost:
       type: number
+      minimum: 0.0
+      maximum: 10.0
       description: "Current power cost multiplier (baseline 1.0)"
     failed_fan:
       type: boolean
@@ -29,9 +35,14 @@ observation_space:
 
 action_space:
   type: string
-  pattern: "^(increase_cooling\\([0-2]\\)|decrease_load\\([0-2]\\)|migrate_jobs\\([0-2],[0-2]\\))$"
+  pattern: "^(increase_cooling\\([0-2]\\)|decrease_load\\([0-2]\\)|migrate_jobs\\(([0-2]),([0-2])\\))$"
   description: "Actions: increase_cooling(N), decrease_load(N), or migrate_jobs(SRC,DST)"
 
 reward:
   type: number
-  description: "Continuous signal combining thermal stability, efficiency, and throughput"
+  description: >
+    Continuous reward combining:
+    - Thermal stability (penalty for high temperatures and cascade risk)
+    - Energy efficiency (penalty for excessive cooling usage)
+    - Load balancing (reward for evenly distributed CPU load)
+    - Failure avoidance (heavy penalty if cascade conditions occur)
