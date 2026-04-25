@@ -196,7 +196,7 @@ This demonstrates that the model successfully learns meaningful control policies
 
 ![Dashboard Screenshot](images/screenshot.png)
 
-[![Open In Colab](https://colab.research.google.com/drive/1qOG7Zp1GNqbYKKP3WJRop1Fa7Yh19nTE#scrollTo=s3xVo-zoqNPy)] 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1qOG7Zp1GNqbYKKP3WJRop1Fa7Yh19nTE#scrollTo=s3xVo-zoqNPy)
 
 ---
 
