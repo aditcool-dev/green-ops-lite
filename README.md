@@ -176,6 +176,19 @@ state → optimal action
 
 ---
 
+## 📉 Training Convergence
+
+![Training Loss](images/training_loss.png)
+
+The training loss for both Actor and Overseer models decreases rapidly in early steps and stabilizes over time, indicating effective learning and convergence.
+
+- Actor final train loss: ~0.1525  
+- Overseer final train loss: ~0.1570  
+
+This demonstrates that the model successfully learns meaningful control policies from the generated data.
+
+---
+
 ## 🎥 Additional Resources
 
 * 📄 Blog Post: https://huggingface.co/spaces/Adit555/green-ops-lite/blob/main/BLOG.md
