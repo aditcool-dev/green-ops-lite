@@ -76,68 +76,66 @@ def ui():
     <head>
         <title>GreenOps-X</title>
         <style>
-            body {
-                font-family: 'Segoe UI', monospace;
-                background: #0f172a;
-                color: #e2e8f0;
-                margin: 0;
-                padding: 20px;
-            }
-            h1 {
-                color: #22c55e;
-            }
-            .container {
-                max-width: 800px;
-                margin: auto;
-            }
-            .card {
-                background: #1e293b;
-                padding: 20px;
-                border-radius: 12px;
-                margin-bottom: 20px;
-                box-shadow: 0 0 10px rgba(0,0,0,0.3);
-            }
-            button {
-                background: #22c55e;
-                color: black;
-                border: none;
-                padding: 10px 15px;
-                margin: 5px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-weight: bold;
-            }
-            button:hover {
-                background: #16a34a;
-            }
-            input {
-                padding: 10px;
-                width: 60%;
-                border-radius: 6px;
-                border: none;
-                margin-right: 10px;
-            }
-            pre {
-                background: black;
-                padding: 15px;
-                border-radius: 8px;
-                color: #22c55e;
-                overflow-x: auto;
-            }
-            .metrics {
-                display: flex;
-                justify-content: space-between;
-                margin-top: 10px;
-            }
-            .metric {
-                background: #020617;
-                padding: 10px;
-                border-radius: 6px;
-                flex: 1;
-                margin: 5px;
-                text-align: center;
-            }
-        </style>
+    body {
+        font-family: 'Segoe UI', monospace;
+        background: #0f172a;
+        color: #e2e8f0;
+        margin: 0;
+        padding: 20px;
+    }
+    h1 { color: #22c55e; }
+
+    .container { max-width: 800px; margin: auto; }
+
+    .card {
+        background: #1e293b;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    }
+
+    button {
+        background: #22c55e;
+        color: black;
+        border: none;
+        padding: 10px 15px;
+        margin: 5px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    input {
+        padding: 10px;
+        width: 60%;
+        border-radius: 6px;
+        border: none;
+        margin-right: 10px;
+    }
+
+    pre {
+        background: black;
+        padding: 15px;
+        border-radius: 8px;
+        color: #22c55e;
+    }
+
+    .metrics {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+    }
+
+    .metric {
+        background: #020617;
+        padding: 10px;
+        border-radius: 6px;
+        flex: 1;
+        margin: 5px;
+        text-align: center;
+    }
+</style>
     </head>
 
     <body>
@@ -145,6 +143,10 @@ def ui():
             <h1>🔥 GreenOps-X Environment</h1>
             <p>AI-powered data center thermal optimization</p>
 
+            <p style="color:#94a3b8">
+            System dynamically balances thermal load and power efficiency using AI policies.
+            </p>
+            
             <div class="card">
                 <button onclick="reset()">Reset Environment</button>
 
@@ -183,7 +185,12 @@ def ui():
                     </div>
                 </div>
             </div>
-
+            
+            <div class="card">
+                <h3>🧾 Action Log</h3>
+                <pre id="log"></pre>
+            </div>
+            
             <div class="card">
                 <h3>📦 Raw Output</h3>
                 <pre id="output"></pre>
@@ -191,38 +198,67 @@ def ui():
         </div>
 
         <script>
-            async function reset() {
-                let res = await fetch('/reset');
-                let data = await res.json();
-                render(data);
-            }
+            let history = [];
+let tempHistory = [];
 
-            async function step() {
-                let action = document.getElementById('action').value;
-                let res = await fetch('/step?action=' + action);
-                let data = await res.json();
-                render(data);
-            }
+async function reset() {
+    let res = await fetch('/reset');
+    let data = await res.json();
+    history = [];
+    tempHistory = [];
+    render(data);
+}
 
-            function render(data) {
-                document.getElementById('output').innerText =
-                    JSON.stringify(data, null, 2);
+async function step() {
+    let action = document.getElementById('action').value;
 
-                document.getElementById('temps').innerText =
-                    data.observation?.rack_temp || "-";
+    let res = await fetch('/step?action=' + action);
+    let data = await res.json();
 
-                document.getElementById('loads').innerText =
-                    data.observation?.cpu_load || "-";
+    history.push(action);
+    document.getElementById('log').innerText = history.join("\n");
 
-                document.getElementById('power').innerText =
-                    data.observation?.power_cost || "-";
+    render(data);
+}
 
-                document.getElementById('reward').innerText =
-                    data.reward ?? "-";
+function getColor(temp) {
+    if (temp > 85) return "#ef4444";
+    if (temp > 75) return "#f59e0b";
+    return "#22c55e";
+}
 
-                document.getElementById('status').innerText =
-                    data.done ? "Finished" : "Running";
-            }
+function render(data) {
+    tempHistory.push(data.observation.rack_temp);
+
+    // Raw JSON output
+    document.getElementById('output').innerText =
+        JSON.stringify(data, null, 2);
+
+    // Temps with color
+    document.getElementById('temps').innerHTML =
+        (data.observation?.rack_temp || [])
+        .map(t => `<span style="color:${getColor(t)}">${t.toFixed(1)}°C</span>`)
+        .join(" | ");
+
+    // Load formatted
+    document.getElementById('loads').innerText =
+        (data.observation?.cpu_load || []).map(x => x.toFixed(2)).join(" | ");
+
+    document.getElementById('power').innerText =
+        data.observation?.power_cost?.toFixed(2) || "-";
+
+    document.getElementById('reward').innerText =
+        data.reward?.toFixed(3) ?? "-";
+
+    // Status
+    if (data.observation?.failed_fan) {
+        document.getElementById('status').innerHTML =
+            "<span style='color:red'>⚠ FAN FAILURE</span>";
+    } else {
+        document.getElementById('status').innerText =
+            data.done ? "Finished" : "Running";
+    }
+}
         </script>
     </body>
     </html>
