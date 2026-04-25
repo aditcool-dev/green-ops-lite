@@ -1,3 +1,14 @@
+---
+title: A multi-objective reinforcement learning environment for optimizing data center energy efficiency and reliability.
+emoji: 🌱
+colorFrom: green
+colorTo: blue
+sdk: docker
+app_file: app.py
+app_port: 7860
+pinned: false
+---
+
 # 🔥 GreenOps-X: AI for Data Center Thermal Optimization
 
 ## 🚀 Overview
