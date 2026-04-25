@@ -4,6 +4,7 @@ from env.environment import GreenOpsEnv
 import uvicorn
 import os
 from env.grader import grade
+from fastapi.responses import HTMLResponse
 
 app = FastAPI()
 
@@ -71,6 +72,38 @@ def main():
     port = int(os.environ.get("PORT", 7860))
     uvicorn.run("server.app:app", host="0.0.0.0", port=port)
 
+@app.get("/ui", response_class=HTMLResponse)
+def ui():
+    return """
+    <html>
+    <body style="font-family: monospace; background: #111; color: #0f0;">
+        <h2>GreenOps-X Environment</h2>
 
+        <button onclick="reset()">Reset</button>
+        <br><br>
+
+        <input id="action" placeholder="e.g. increase_cooling(0)" />
+        <button onclick="step()">Step</button>
+
+        <pre id="output"></pre>
+
+        <script>
+            async function reset() {
+                let res = await fetch('/reset');
+                let data = await res.json();
+                document.getElementById('output').innerText = JSON.stringify(data, null, 2);
+            }
+
+            async function step() {
+                let action = document.getElementById('action').value;
+                let res = await fetch('/step?action=' + action);
+                let data = await res.json();
+                document.getElementById('output').innerText = JSON.stringify(data, null, 2);
+            }
+        </script>
+    </body>
+    </html>
+    """
+    
 if __name__ == "__main__":
     main()
