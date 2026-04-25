@@ -218,6 +218,5 @@ This demonstrates that the model successfully learns meaningful control policies
 ## 🧑‍💻 Author
 
 Adit Rastogi
-BMS College of Engineering
 
 ---
