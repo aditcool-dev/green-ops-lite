@@ -130,12 +130,32 @@ This ensures **robust performance trends**, not single-run noise.
 ```text
 green-ops-lite/
 │
-├── server/                 # FastAPI backend + environment
-├── inference.py           # Actor + Overseer inference pipeline
-├── greenops_lora_training.ipynb  # Model training notebook
-├── app.py                 # UI / entry point
-├── requirements.txt       # Dependencies
-└── README.md
+├── env/                          # 🧠 Core environment logic
+│   ├── __init__.py
+│   ├── environment.py            # Simulation environment (thermal dynamics)
+│   ├── grader.py                 # Scoring & evaluation logic
+│   └──models.py                 # State + data models
+│
+├── server/                       # 🌐 Backend / UI serving
+│   ├── __init__.py
+│   └── app.py                    # FastAPI app / UI backend
+│
+├── images/                       # 🖼 Assets
+│   └── screenshot.png            # Dashboard preview
+│
+├── generate_data.py              # 📊 Data generation script
+├── greenops_lora_training.ipynb  # 🤖 LoRA training notebook
+├── inference.py                  # ⚡ Actor + Overseer inference pipeline
+├── server.py                     # 🚀 Local server entry point
+│
+├── openenv.yaml                  # 🔌 OpenEnv configuration
+├── Dockerfile                    # 🐳 Container setup
+├── requirements.txt              # 📦 Dependencies
+├── pyproject.toml                # ⚙️ Project config
+├── uv.lock                       # 🔒 Dependency lock file
+│
+├── BLOG.md                       # 📄 Detailed blog write-up
+└── README.md                     # 📘 Project documentation
 ```
 
 ---
