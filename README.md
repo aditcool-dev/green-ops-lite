@@ -192,7 +192,7 @@ This demonstrates that the model successfully learns meaningful control policies
 ## 🎥 Additional Resources
 
 * 📄 Blog Post: https://huggingface.co/spaces/Adit555/green-ops-lite/blob/main/BLOG.md
-* [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1qOG7Zp1GNqbYKKP3WJRop1Fa7Yh19nTE#scrollTo=s3xVo-zoqNPy)
+* 📄 Tuining Notebook: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1qOG7Zp1GNqbYKKP3WJRop1Fa7Yh19nTE#scrollTo=s3xVo-zoqNPy)
 
 * 📊 Pre/Post Training Grade Chart
 
