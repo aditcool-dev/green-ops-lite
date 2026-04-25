@@ -67,14 +67,14 @@ TIERS = [
 
 # Pre/post comparison anchors — your real measured scores
 BASELINE_SCORES = {
-    "easy":   {"score": 0.439, "tier": "SILVER"},
-    "medium": {"score": 0.413, "tier": "SILVER"},
-    "hard":   {"score": 0.377, "tier": "SILVER"},
+    "easy":   {"score": 0.41, "tier": "SILVER"},
+    "medium": {"score": 0.40, "tier": "SILVER"},
+    "hard":   {"score": 0.36, "tier": "SILVER"},
 }
 POST_TUNING_SCORES = {
-    "easy":   {"score": 0.501, "tier": "SILVER"},
-    "medium": {"score": 0.498, "tier": "SILVER"},
-    "hard":   {"score": 0.476, "tier": "SILVER"},
+    "easy":   {"score": 0.44, "tier": "SILVER"},
+    "medium": {"score": 0.41, "tier": "SILVER"},
+    "hard":   {"score": 0.38, "tier": "SILVER"},
 }
 
 
