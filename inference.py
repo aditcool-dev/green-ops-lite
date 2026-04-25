@@ -13,6 +13,8 @@ import os as _os
 random.seed(int.from_bytes(_os.urandom(8), "big"))
 from unsloth import FastLanguageModel
 import torch
+from audit_trail import AuditTrail
+_audit = AuditTrail()
 
 # ============================================================
 # CONFIGURATION
@@ -1283,6 +1285,7 @@ def run_task(task: str) -> float:
     global _last_space_fix
     _last_space_fix = None
     _reset_episode_state()
+    _audit.clear()
     _profiler.start(task)
 
     steps = MAX_STEPS.get(task, 10)
@@ -1296,8 +1299,16 @@ def run_task(task: str) -> float:
 
     for step in range(1, steps + 1):
         obs_snap = obs
-        action   = get_action(obs, task)
+        action   = get_action(obs, task) 
         result   = env.step(action)
+        _audit.record(                          
+            env.step_count,
+            action,                              
+            obs_snap,
+            result.observation,
+            result.reward,
+            result.done,
+        )
         reward   = result.reward if result.reward is not None else 0.0
 
         _memory.record_reward(reward)
@@ -1326,6 +1337,7 @@ def run_task(task: str) -> float:
 
     env.close()
     score = grade(env)
+    _audit.verify()
     log_end(score)
     _profiler.emit_summary(score)
     return score
