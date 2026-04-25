@@ -202,11 +202,25 @@ def ui():
 let tempHistory = [];
 
 async function reset() {
-    let res = await fetch('/reset');
-    let data = await res.json();
-    history = [];
-    tempHistory = [];
-    render(data);
+    try {
+        let res = await fetch('/reset');
+
+        if (!res.ok) {
+            throw new Error("Reset API failed");
+        }
+
+        let data = await res.json();
+
+        history = [];
+        tempHistory = [];
+
+        document.getElementById('log').innerText = ""; // clear log
+
+        render(data);
+    } catch (err) {
+        console.error(err);
+        alert("Reset failed. Check logs.");
+    }
 }
 
 async function step() {
