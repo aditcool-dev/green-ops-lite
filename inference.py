@@ -11,24 +11,40 @@ import numpy as np
 import random, time
 import os as _os
 random.seed(int.from_bytes(_os.urandom(8), "big"))
+from unsloth import FastLanguageModel
+import torch
 
 # ============================================================
 # CONFIGURATION
 # ============================================================
 
-API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
-MODEL_NAME   = os.getenv("MODEL_NAME",   "gpt-4o-mini")
-HF_TOKEN     = os.getenv("HF_TOKEN")
-DEBUG        = os.getenv("DEBUG", "false").lower() == "true"
+BASE_MODEL = "unsloth/mistral-7b-instruct"
 
-if not HF_TOKEN:
-    raise ValueError("HF_TOKEN not set")
+# ============================================================
+# ACTOR MODEL
+# ============================================================
+_actor_model, _actor_tokenizer = FastLanguageModel.from_pretrained(
+    model_name="Adit555/greenops-actor-lora",
+    max_seq_length=1024,
+    load_in_4bit=True,
+)
 
-client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
+FastLanguageModel.for_inference(_actor_model)
+
+# ============================================================
+# OVERSEER MODEL
+# ============================================================
+_overseer_model, _overseer_tokenizer = FastLanguageModel.from_pretrained(
+    model_name="Adit555/greenops-overseer-lora",
+    max_seq_length=1024,
+    load_in_4bit=True,
+)
+
+FastLanguageModel.for_inference(_overseer_model)
 
 # [FEAT-14] Different step budgets per task
 MAX_STEPS = {"easy": 10, "medium": 10, "hard": 10}
-
+DEBUG        = os.getenv("DEBUG", "false").lower() == "true"
 N_RACKS   = 3
 NUM_RACKS = 3
 _last_space_fix = None
@@ -512,25 +528,43 @@ def _reset_episode_state() -> None:
 # ============================================================
 
 def _llm_call(messages: list, max_tokens: int, temperature: float,
-              retries: int = 2) -> str | None:
-    """[FEAT-8] Shared LLM caller with exponential-backoff retry."""
+              retries: int = 2,
+              _model=None, _tokenizer=None) -> str | None:
+
+    mdl = _model     or _actor_model
+    tok = _tokenizer or _actor_tokenizer
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    prompt = tok.apply_chat_template(
+        messages, tokenize=False, add_generation_prompt=True
+    )
+
+    inputs = tok(prompt, return_tensors="pt").to(device)
+
     for attempt in range(retries + 1):
         try:
-            res = client.chat.completions.create(
-                model=MODEL_NAME,
-                messages=messages,
-                temperature=temperature,
-                max_tokens=max_tokens,
-                response_format={"type": "json_object"},
-            )
-            return res.choices[0].message.content
+            with torch.no_grad():
+                outputs = mdl.generate(
+                    **inputs,
+                    max_new_tokens=max_tokens,
+                    temperature=max(temperature, 0.01),
+                    do_sample=temperature > 0,
+                    pad_token_id=tok.eos_token_id,
+                    eos_token_id=tok.eos_token_id,
+                )
+
+            return tok.decode(
+                outputs[0][inputs["input_ids"].shape[1]:],
+                skip_special_tokens=True
+            ).strip()
+
         except Exception as e:
             if attempt == retries:
-                debug_log(f"LLM call failed after {retries+1} attempts: {e}")
+                debug_log(f"LLM failed after {retries+1}: {e}")
                 return None
-            wait = 0.4 * (2 ** attempt)
-            debug_log(f"LLM retry {attempt+1}/{retries} in {wait:.1f}s: {e}")
-            time.sleep(wait)
+            time.sleep(0.4 * (2 ** attempt))
+
     return None
 
 
@@ -630,11 +664,9 @@ OUTPUT — valid JSON only, no markdown, no explanation:
     content = _llm_call(
         messages=[{"role": "user", "content": prompt}],
         max_tokens=120,
-        # [FIX-DIVERSITY] Raised from 0.15 → 0.6. At 0.15 the LLM outputs were
-        # near-deterministic, producing near-identical action sequences across episodes
-        # even when initial conditions varied. 0.6 gives genuine action diversity
-        # while still being grounded — good for LoRA fine-tuning data variety.
         temperature=0.6,
+        _model=_actor_model,
+        _tokenizer=_actor_tokenizer
     )
 
     hottest = obs.rack_temp.index(max(obs.rack_temp))
@@ -735,10 +767,9 @@ Note: if override_thermal is false, final_thermal MUST equal the original therma
     content = _llm_call(
         messages=[{"role": "user", "content": prompt}],
         max_tokens=160,
-        # [FIX-DIVERSITY] Raised from 0.10 → 0.45. Overseer needs some variance
-        # to produce diverse override vs all_clear labels for training data.
-        # Kept lower than pass1 (0.6) since overseer safety decisions are more sensitive.
         temperature=0.45,
+        _model=_overseer_model,
+        _tokenizer=_overseer_tokenizer
     )
 
     if not content:
