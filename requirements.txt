@@ -2,3 +2,8 @@ pydantic
 openai
 fastapi
 uvicorn
+unsloth
+transformers<5.0
+accelerate
+bitsandbytes
+torch

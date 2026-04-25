@@ -664,7 +664,7 @@ OUTPUT — valid JSON only, no markdown, no explanation:
     content = _llm_call(
         messages=[{"role": "user", "content": prompt}],
         max_tokens=120,
-        temperature=0.6,
+        temperature=0.3,
         _model=_actor_model,
         _tokenizer=_actor_tokenizer
     )
