@@ -4,18 +4,15 @@ from env.environment import GreenOpsEnv
 import uvicorn
 import os
 from env.grader import grade
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 app = FastAPI()
 
 env = GreenOpsEnv()
 
 @app.get("/")
-def home():
-    return {
-        "status": "running",
-        "endpoints": ["/reset", "/step?action=..."]
-    }
+def root():
+    return RedirectResponse(url="/ui")
 
 @app.api_route("/grade", methods=["GET", "POST"])
 async def get_grade():
