@@ -73,16 +73,16 @@ This means the agent can't just cool everything — that tanks efficiency. It ca
 
 ```
 ┌──────────────────────────────────────────────────────┐
-│                    env/ (shared)                      │
+│                    env/ (shared)                     │
 │   environment.py · grader.py · models.py             │
-│   Physics, reward, dynamics — no networking           │
+│   Physics, reward, dynamics — no networking          │
 └────────────────┬─────────────────┬───────────────────┘
                  │                 │
        ┌─────────▼────────┐  ┌────▼──────────────────────┐
-       │   server.py      │  │   app.py                   │
-       │  OpenEnv MCP     │  │  Visual demo               │
-       │  reset/step/state│  │  Hosted on HF Spaces       │
-       │  run locally     │  │  adit555-green-ops-lite    │
+       │   server.py      │  │   app.py                  │
+       │  OpenEnv MCP     │  │  Visual demo              │
+       │  reset/step/state│  │  Hosted on HF Spaces      │
+       │  run locally     │  │  adit555-green-ops-lite   │
        │  ← judges eval   │  │  ← open in browser        │
        └─────────┬────────┘  └───────────────────────────┘
                  │
@@ -289,6 +289,15 @@ green-ops-lite/
 LLMs are typically evaluated on language tasks. GreenOps-X asks a different question: **can an LLM learn to act in a physically constrained, multi-objective environment where wrong decisions have cascading consequences?**
 
 The answer, shown here, is yes — and the pattern generalises. The same two-pass Actor-Overseer architecture, trained on environment-generated SFT data, could apply to power grid management, HVAC systems, network routing, or any domain where decisions have physical consequences and energy costs.
+
+---
+
+## 🔗 All Resources (Quick Access)
+
+- 🎮 Live Demo (UI): https://adit555-green-ops-lite.hf.space/ui  
+- 📊 Analysis Dashboard: https://huggingface.co/spaces/Adit555/greenops-analysis-dashboard  
+- 📓 Training Notebook (Colab): https://colab.research.google.com/drive/1qOG7Zp1GNqbYKKP3WJRop1Fa7Yh19nTE  
+- 📝 Mini Blog: https://huggingface.co/spaces/Adit555/green-ops-lite/blob/main/BLOG.md  
 
 ---
 
