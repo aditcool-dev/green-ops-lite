@@ -1,107 +1,150 @@
-# 🔥 GreenOps-X: AI for Data Center Thermal Optimization
+# 🔥 GreenOps-X: Teaching AI to Control Data Center Systems
 
 ## 🚀 Overview
 
-GreenOps-X is an AI-driven system that learns to control data center cooling and workload distribution under dynamic conditions.
+Can an AI learn to manage a data center in real time?
 
-It simulates:
-- thermal dynamics
-- hardware failures
-- energy constraints
+GreenOps-X is an AI-driven system where a model learns to control cooling and workload distribution in a simulated data center environment.
 
-and learns optimal actions to maintain stability.
+Instead of generating text, the model takes **structured control actions** like cooling racks, reducing load, and migrating jobs.
 
 ---
 
-## 🧠 Problem
+## 🧠 The Problem
 
-Modern data centers face:
+Modern data centers face three key challenges:
 
-- 🔥 overheating → cascading failures  
-- ⚡ excessive cooling → high energy cost  
-- ⚖️ poor load balance → hotspots  
+* 🔥 **Overheating** → can lead to cascading failures
+* ⚡ **Excessive cooling** → wastes energy
+* ⚖️ **Load imbalance** → creates hotspots
 
-Traditional systems are rule-based and reactive.
+Most existing systems are:
 
----
-
-## ⚙️ Solution
-
-GreenOps-X combines:
-
-### 1. Physics-Based Environment
-
-- CPU load generates heat  
-- Thermal runaway beyond thresholds  
-- Fan failure triggers cascade  
+* reactive
+* rule-based
+* inefficient under failures
 
 ---
 
-### 2. Action Space
+## ⚙️ What We Built
 
-- `increase_cooling(rack)`
-- `decrease_load(rack)`
-- `migrate_jobs(src, dst)`
+We designed a **physics-based simulation environment** where an AI agent learns to make control decisions.
 
----
+The environment models:
 
-### 3. Two-Pass Control (Actor + Overseer)
-
-- Actor → proposes actions  
-- Overseer → enforces safety  
-
-This ensures stable and safe decisions.
+* heat generation from CPU load
+* temperature dynamics over time
+* failure scenarios like broken fans
 
 ---
 
-### 4. OpenEnv MCP Integration
+## 🎮 Action Space
 
-- `reset()` and `step()` implemented  
-- OpenEnv-compatible schema  
-- MCP-ready environment  
+The agent can take three types of actions:
 
----
+* `increase_cooling(rack)`
+* `decrease_load(rack)`
+* `migrate_jobs(src, dst)`
 
-## 📊 Data Generation
-
-We generated ~4000+ samples using:
-
-- multi-task scenarios (easy / medium / hard)
-- physics-based rollouts
-- reward filtering
+Each action has trade-offs between temperature, cost, and performance.
 
 ---
 
-## 🤖 Model Training
+## 🔑 Key Design Features
 
-We use:
+### 1. 🔮 Early Prediction (Cascade Awareness)
 
-- Mistral-7B (Unsloth)
-- LoRA fine-tuning
+The system can anticipate when temperatures will rise in the next few steps.
 
-Goal:
+Instead of reacting late, the agent learns to:
 
-state → optimal action
+👉 act early and prevent failures
 
 ---
 
-## 📈 Results (Pre-Training)
+### 2. 🧠 Planning Instead of Reacting
+
+Because of predictive signals, the model learns:
+
+* to migrate jobs before overheating
+* to balance long-term trade-offs
+
+---
+
+### 3. 🤖 Two-Pass Control System
+
+We use a simple but powerful structure:
+
+* **Actor** → proposes actions
+* **Overseer** → validates safety
+
+This avoids unsafe decisions and improves stability.
+
+---
+
+### 4. 🔐 Action Audit Trail
+
+Every action is:
+
+* hashed (SHA-256)
+* stored in an append-only log
+
+This ensures:
+
+* traceability
+* reproducibility
+* trust in evaluation
+
+---
+
+### 5. 📊 SLA-Based Evaluation
+
+We map scores to human-readable levels:
+
+* Platinum → production-ready
+* Gold → reliable
+* Bronze → recoverable
+* Breach → failure
+
+---
+
+## 📊 Training Approach
+
+Instead of reinforcement learning, we used:
+
+👉 **Supervised Fine-Tuning (SFT)** with LoRA
+
+We generated ~4000+ samples from the environment and trained two models:
+
+* Actor (decision-making)
+* Overseer (safety validation)
+
+---
+
+## 📉 Training Evidence
+
+Both models show stable convergence:
+
+* consistent loss reduction
+* training ≈ validation (good generalization)
+
+This confirms the model is learning meaningful behavior.
+
+---
+
+## 📈 Results (Before vs After Training)
 
 Before training:
 
-- repetitive decisions  
-- inefficient cooling  
-- slower recovery  
+* overuse of cooling
+* inefficient decisions
+* poor handling of failures
 
----
+After training:
 
-## 🔥 Expected Improvements
-
-After fine-tuning:
-
-- faster stabilization  
-- lower power cost  
-- smarter migration decisions  
+* better balance between cooling and migration
+* lower energy usage
+* improved stability in difficult scenarios
 
 ---
 
@@ -109,26 +152,36 @@ After fine-tuning:
 
 👉 https://adit555-green-ops-lite.hf.space/ui
 
-- Reset environment  
-- Execute actions  
-- Observe system behavior  
+You can:
+
+* run the simulation
+* observe temperature changes
+* see how the agent reacts in real time
 
 ---
 
 ## 🧠 Key Insight
 
-> AI can control complex physical systems when grounded in realistic environments.
+> Even without reinforcement learning, LLMs can learn meaningful control strategies when trained on structured environment data.
 
 ---
 
 ## 🚀 Future Work
 
-- reinforcement learning  
-- multi-agent coordination  
-- real-world deployment  
+* reinforcement learning for long-term optimization
+* stronger safety policies
+* scaling to larger systems
 
 ---
 
-## 🔗 Repository
+## 🔗 Resources
 
-https://github.com/aditcool-dev/green-ops-lite
+* Demo: https://adit555-green-ops-lite.hf.space/ui
+* Dashboard: https://huggingface.co/spaces/Adit555/greenops-analysis-dashboard
+* Repo: https://github.com/aditcool-dev/green-ops-lite
+
+---
+
+## 💯 Final Thought
+
+GreenOps-X shows that LLMs can move beyond language tasks and begin to operate as **decision-making systems in real-world environments**.
