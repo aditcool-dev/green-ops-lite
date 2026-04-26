@@ -15,7 +15,7 @@ pinned: false
 > We built a physical simulation to test this — and showed it can.
 > 💡 We focused on **environment design and iterative training**, not model size — enabling stable, controllable behavior with efficient compute.
 
-> **Architecture note for judges:** `app.py` is hosted on HuggingFace Spaces as the live visual demo. `server.py` is the OpenEnv MCP environment — clone the repo and run it locally for evaluation. Both share the same `env/` simulation layer.
+> **Architecture note for judges:** `app.py` is hosted on HuggingFace Spaces as the live visual demo. `server.py` is the OpenEnv OpenEnv-compatible environment used for evaluation — clone the repo and run it locally for evaluation. Both share the same `env/` simulation layer.
 
 [![HF Space — Live Demo](https://img.shields.io/badge/Live_Demo-green--ops--lite-blue?logo=huggingface)](https://adit555-green-ops-lite.hf.space/ui)
 [![HF Space — Dashboard](https://img.shields.io/badge/Dashboard-analysis-blue?logo=huggingface)](https://huggingface.co/spaces/Adit555/greenops-analysis-dashboard)
@@ -80,7 +80,7 @@ This means the agent can't just cool everything — that tanks efficiency. It ca
                  │                 │
        ┌─────────▼────────┐  ┌────▼──────────────────────┐
        │   server.py      │  │   app.py                  │
-       │  OpenEnv MCP     │  │  Visual demo              │
+       │  OpenEnv         │  │  Visual demo              │
        │  reset/step/state│  │  Hosted on HF Spaces      │
        │  run locally     │  │  adit555-green-ops-lite   │
        │  ← judges eval   │  │  ← open in browser        │
@@ -203,6 +203,19 @@ Two separate LoRA adapters are trained — one for the Actor (action proposal) a
 
 ---
 
+## 📊 Dataset
+
+Training data (~6MB) is included in the `datasets/` folder for full reproducibility.
+
+You can either:
+
+- use the provided dataset directly  
+- or regenerate it using:
+
+```bash
+python generate_data.py
+```
+
 ## 🚀 Running the System
 
 **Two files, two purposes:**
@@ -210,7 +223,7 @@ Two separate LoRA adapters are trained — one for the Actor (action proposal) a
 | File | Where it runs | What it is |
 |------|--------------|------------|
 | `app.py` | ☁️ Hosted on HuggingFace Spaces | Interactive visual demo — live at the URL below |
-| `server.py` | 💻 Run locally by judges | OpenEnv MCP environment server for evaluation |
+| `server.py` | 💻 Run locally by judges | OpenEnv environment server for evaluation |
 
 ---
 
@@ -263,16 +276,22 @@ green-ops-lite/
 │   └── app.py               # ← Visual demo (hosted on HuggingFace Spaces)
 │                            #   Interactive UI at /ui
 │
+├── datasets/                # 📊 Training data (included for reproducibility)
+│   ├── actor_train.jsonl
+│   ├── actor_val.jsonl
+│   ├── overseer_train.jsonl
+│   └── overseer_val.jsonl
+│
 ├── images/
 │   ├── screenshot.png
 │   └── training_loss.png    # Training evidence embedded in README
 │
-├── server.py                # ← OpenEnv MCP environment (run locally by judges)
-│                            #   Exposes reset / step / state as MCP tools
+├── server.py                # ← OpenEnv environment (run locally by judges)
+│                            #   Exposes reset / step / state
 ├── audit_trail.py           # SHA-256 hash-chained action ledger
 ├── sla.py                   # SLA tier classification (Platinum/Gold/Bronze)
 ├── inference.py             # Two-pass LLM agent (Actor + Overseer)
-├── generate_data.py         # SFT data collection with per-episode seeds
+├── generate_data.py         # SFT data generation (optional regeneration)
 ├── greenops_lora_training.ipynb  # Colab training notebook
 ├── openenv.yaml             # OpenEnv manifest
 ├── Dockerfile               # HuggingFace Spaces deployment
