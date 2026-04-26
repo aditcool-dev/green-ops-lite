@@ -26,9 +26,9 @@ pinned: false
 
 ## ⚡ Start Here (Judges)
 
-1. Open the live demo: https://adit555-green-ops-lite.hf.space/ui  
+1. Open the live demo: [![HF Space — Live Demo](https://img.shields.io/badge/Live_Demo-green--ops--lite-blue?logo=huggingface)](https://adit555-green-ops-lite.hf.space/ui) 
 2. Run a simulation and observe agent behavior  
-3. Open the analysis dashboard for before/after comparison  
+3. Open the [![HF Space — Dashboard](https://img.shields.io/badge/Dashboard-analysis-blue?logo=huggingface)](https://huggingface.co/spaces/Adit555/greenops-analysis-dashboard) for before/after comparison  
 4. (Optional) Run the environment locally using `server.py` (for OpenEnv evaluation)
 
 > 💡 The agent balances temperature, energy cost, and workload in real time.
