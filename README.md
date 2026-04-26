@@ -19,7 +19,7 @@ pinned: false
 
 [![HF Space — Live Demo](https://img.shields.io/badge/Live_Demo-green--ops--lite-blue?logo=huggingface)](https://adit555-green-ops-lite.hf.space/ui)
 [![HF Space — Dashboard](https://img.shields.io/badge/Dashboard-analysis-blue?logo=huggingface)](https://huggingface.co/spaces/Adit555/greenops-analysis-dashboard)
-[![Colab Notebook](https://img.shields.io/badge/Training_Notebook-Colab-orange?logo=googlecolab)](https://colab.research.google.com/drive/1qOG7Zp1GNqbYKKP3WJRop1Fa7Yh19nTE)
+[![Colab Notebook](https://img.shields.io/badge/Training_Notebook-Colab-orange?logo=googlecolab)](https://colab.research.google.com/drive/1qOG7Zp1GNqbYKKP3WJRop1Fa7Yh19nTE?usp=sharing)
 [![Blog](https://img.shields.io/badge/Mini_Blog-HuggingFace-yellow?logo=huggingface)](https://huggingface.co/spaces/Adit555/green-ops-lite/blob/main/BLOG.md)
 
 ---
@@ -238,7 +238,7 @@ Evaluate: 8-seed grader average per task
 
 Two separate LoRA adapters are trained — one for the Actor (action proposal) and one for the Overseer (safety validation). This keeps the roles cleanly separated and allows independent improvement of each.
 
-**[Open Training Notebook in Colab →](https://colab.research.google.com/drive/1qOG7Zp1GNqbYKKP3WJRop1Fa7Yh19nTE)**
+**[Open Training Notebook in Colab →](https://colab.research.google.com/drive/1qOG7Zp1GNqbYKKP3WJRop1Fa7Yh19nTE?usp=sharing)**
 
 ---
 
@@ -354,7 +354,7 @@ The answer, shown here, is yes — and the pattern generalises. The same two-pas
 
 - 🎮 Live Demo (UI): https://adit555-green-ops-lite.hf.space/ui  
 - 📊 Analysis Dashboard: https://huggingface.co/spaces/Adit555/greenops-analysis-dashboard  
-- 📓 Training Notebook (Colab): https://colab.research.google.com/drive/1qOG7Zp1GNqbYKKP3WJRop1Fa7Yh19nTE  
+- 📓 Training Notebook (Colab): https://colab.research.google.com/drive/1qOG7Zp1GNqbYKKP3WJRop1Fa7Yh19nTE?usp=sharing 
 - 📝 Mini Blog: https://huggingface.co/spaces/Adit555/green-ops-lite/blob/main/BLOG.md  
 
 ---
