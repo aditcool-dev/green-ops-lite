@@ -11,8 +11,8 @@ pinned: false
 
 # GreenOps-X — AI Control System for Data Center Thermal Management
 
-> **Can an LLM learn to run a data center?**
-> We built an environment to find out — and showed it can.
+> **Can an LLM learn to control a data center in real time?**
+> We built a physical simulation to test this — and showed it can.
 > 💡 We focused on **environment design and iterative training**, not model size — enabling stable, controllable behavior with efficient compute.
 
 > **Architecture note for judges:** `app.py` is hosted on HuggingFace Spaces as the live visual demo. `server.py` is the OpenEnv MCP environment — clone the repo and run it locally for evaluation. Both share the same `env/` simulation layer.
@@ -30,6 +30,8 @@ pinned: false
 2. Run a simulation and observe agent behavior  
 3. Open the analysis dashboard for before/after comparison  
 4. (Optional) Run the environment locally using `server.py` (for OpenEnv evaluation)
+
+> 💡 The agent balances temperature, energy cost, and workload in real time.
 
 ---
 
@@ -115,7 +117,7 @@ Observation (from server.py MCP)
 
 **Why two passes?** A single LLM confident in a wrong decision is worse than one that gets checked. The Overseer fires selectively — only when the thermal state is genuinely dangerous — so it doesn't add latency on easy steps. This mirrors real SRE practice where a second pair of eyes only engages on incidents.
 
-> 🔑 Important: The OpenEnv evaluation uses only `server.py` (environment).
+> 🔑 **Important:** The OpenEnv evaluation uses only `server.py` (environment).
 > The agent (`inference.py`) is provided for training, testing, and demonstration.
 
 ---
@@ -201,7 +203,7 @@ Two separate LoRA adapters are trained — one for the Actor (action proposal) a
 
 ---
 
-## Running It
+## 🚀 Running the System
 
 **Two files, two purposes:**
 
