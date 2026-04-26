@@ -166,14 +166,53 @@ The hard scenario introduces a broken fan on rack 0 that adds +3.0°C/step heat 
 
 ![pre/post training results](images/screenshot.png)
 
-**Training metrics:**
+## 📉 Training Logs & Convergence
 
-- Actor loss: 0.1525 (converged at epoch 3)
-- Overseer loss: 0.1570 (stable throughout)
-- Training data: 4,000+ step-level samples across easy/medium/hard tasks
-- Method: Supervised Fine-Tuning (SFT) with LoRA, r=16, Unsloth
+We trained two separate LoRA adapters:
 
-![Training Loss Graph](images/training_loss.png)
+- **Actor (Decision Model)** → generates actions  
+- **Overseer (Safety Model)** → validates and corrects actions  
+
+---
+
+### 🔹 Actor (Decision Model) — Training Logs
+
+| Step | Training Loss | Validation Loss |
+|------|--------------|----------------|
+| 100  | 0.1116 | 0.1100 |
+| 200  | 0.0991 | 0.0983 |
+| 300  | 0.0942 | 0.0938 |
+| 400  | 0.0908 | 0.0908 |
+| 500  | 0.0889 | 0.0888 |
+| 600  | 0.0861 | 0.0869 |
+| 700  | 0.0854 | 0.0857 |
+| 759  | 0.0840 | 0.0855 |
+
+---
+
+### 🔹 Overseer (Safety Model) — Training Logs
+
+| Step | Training Loss | Validation Loss |
+|------|--------------|----------------|
+| 100  | 0.1193 | 0.1189 |
+| 200  | 0.1103 | 0.1095 |
+| 300  | 0.1038 | 0.1034 |
+| 400  | 0.0998 | 0.0988 |
+| 500  | 0.0965 | 0.0970 |
+| 600  | 0.0922 | 0.0947 |
+| 700  | 0.0932 | 0.0929 |
+| 789  | 0.0910 | 0.0926 |
+
+---
+
+### 📊 Key Observations
+
+- steady loss reduction in both models → successful learning  
+- training ≈ validation → good generalization  
+- smooth convergence → stable fine-tuning  
+- both **decision-making (Actor)** and **safety validation (Overseer)** improve  
+
+![Training Loss](images/training_loss.png)
 
 ---
 
